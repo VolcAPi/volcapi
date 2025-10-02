@@ -1,0 +1,67 @@
+openapi: 3.0.3
+info:
+  title: HttpBin Test API
+  version: 1.0.0
+servers:
+  - url: https://httpbin.org
+
+# Global scenarios defined inside openapi.yml
+scenarios:
+  simple_get:
+      headers:
+        Accept: application/json
+      response:
+        status: 200
+        body:
+          contains: ["headers.Host"]
+          json:
+            headers:
+              object: 
+                Accept:
+                  value: "application/json"
+                Accept-Encoding:
+                  value: "gzip"
+                Content-Length:
+                  value: "4"
+                Host:
+                  value: "0.0.0.0"
+                User-Agent:
+                  value: "Go-http-client/1.1"
+            origin: 
+              value: "172.17.0.1"
+            url: 
+              value: "http://0.0.0.0/get"
+  simple_get_query:
+      query:
+        id: 132
+      headers:
+        Accept: application/json
+      response:
+        status: 200
+        body:
+          json:
+            headers:
+              object: 
+                Accept:
+                  value: "application/json"
+                Accept-Encoding:
+                  value: "gzip"
+                Content-Length:
+                  value: "4"
+                Host:
+                  value: "0.0.0.0"
+                User-Agent:
+                  value: "Go-http-client/1.1"
+            origin: 
+              value: "172.17.0.1"
+            url: 
+              value: "http://0.0.0.0/get?id=132"
+paths:
+  /get:
+    get:
+      summary: Echo request
+      responses:
+        '200':
+          description: OK
+      v-functional-test:
+        scenarios: ["simple_get", "simple_get_query"]

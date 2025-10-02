@@ -1,0 +1,26 @@
+host: http://0.0.0.0
+scenarios:
+  invalid_token:
+      headers:
+        Authorization: Token INVALID
+      response:
+        status: 401
+        body:
+          json:
+            error:
+              value: unauthorized
+
+  valid_post:
+      headers:
+        Content-Type: application/json
+      request:
+        name: aliamer
+        email: aliamer@gmail.com
+      response:
+        status: 200
+        body:
+          contains: ["name", "email"]
+
+env:
+  TOKEN: sfkdjfelkdf
+  MAX: "13"
