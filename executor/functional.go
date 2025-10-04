@@ -34,10 +34,20 @@ func runFunctional(endPoint, method, scenarioName string, scenario config.Scenar
 	label := fmt.Sprintf("%s [%s %s]", scenarioName, method, endPoint)
 	spin := showSpinner(label)
 	fmt.Printf("%s -%s\n", endPoint, method)
-	bodyBytes, err := json.Marshal(scenario.Request)
-	if err != nil {
-		return err
+	var bodyBytes []byte
+	var err error
+
+	if scenario.Request.Json != nil {
+		bodyBytes, err = json.Marshal(scenario.Request.Json)
+		if err != nil {
+			return err
+		}
+	} else if scenario.Request.Text != nil {
+		bodyBytes = []byte(*scenario.Request.Text)
+	} else {
+		bodyBytes = []byte("")
 	}
+
 	req, err := http.NewRequest(method, endPoint, bytes.NewReader(bodyBytes))
 	if err != nil {
 		spin.Stop()
@@ -62,7 +72,7 @@ func runFunctional(endPoint, method, scenarioName string, scenario config.Scenar
 	respBody, _ := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if scenario.Response.Status != nil && *scenario.Response.Status != resp.StatusCode {
-		fmt.Printf("   %s %s  %s (expected %s, got %s)  %s\n",
+		fmt.Printf("   %s %s  %s (expected status %s, got %s)  %s\n",
 			symbolFail,
 			cRed.Sprintf(scenarioName),
 			cRed.Sprintf("Status mismatch"),
@@ -116,11 +126,12 @@ func validateExpectations(respBody []byte, expect config.Response) error {
 	}
 
 	for key, value := range actualBody {
-    json := *expect.Body.Json
-		if expected, ok := json[key]; ok {
-			err := validateJNode(value, key, expected)
-			if err != nil {
-				return err
+		if expect.Body.Json != nil {
+			json := *expect.Body.Json
+			if expected, ok := json[key]; ok {
+				if err := validateJNode(value, key, expected); err != nil {
+					return err
+				}
 			}
 		}
 	}

@@ -7,6 +7,32 @@ servers:
 
 # Global scenarios defined inside openapi.yml
 scenarios:
+  valid_user:
+    params:
+      user: ali
+      passwd: 123
+    headers:
+      Authorization: Basic $TOKEN
+      Accept: application/json
+    response:
+      status: 200
+      body:
+        contains: ["authenticated", "user"]
+        json:
+          authenticated: 
+            value: true
+          user: 
+            value: ali
+  invalid_user:
+    params:
+      user: invalid
+      passwd: invalid
+    headers:
+      Accept: application/json
+      Authorization: Basic $TOKEN
+    response:
+      status: 401
+ 
   simple_get:
       headers:
         Accept: application/json
@@ -21,8 +47,6 @@ scenarios:
                   value: "application/json"
                 Accept-Encoding:
                   value: "gzip"
-                Content-Length:
-                  value: "4"
                 Host:
                   value: "0.0.0.0"
                 User-Agent:
@@ -46,8 +70,6 @@ scenarios:
                   value: "application/json"
                 Accept-Encoding:
                   value: "gzip"
-                Content-Length:
-                  value: "4"
                 Host:
                   value: "0.0.0.0"
                 User-Agent:
@@ -56,6 +78,40 @@ scenarios:
               value: "172.17.0.1"
             url: 
               value: "http://0.0.0.0/get?id=132"
+  
+  valid_token:
+    headers:
+      Accept: application/json
+      Authorization: Bearer valid_token
+    response:
+      status: 200
+      body:
+        json:
+          authenticated: 
+            value: true
+          token:
+            value: valid_token
+
+  invalid_token:
+    headers:
+      Accept: application/json
+      Authorization: invalid
+    response:
+      status: 401
+  create_post:
+    headers:
+      Accept: application/json
+    request:
+      json:
+        title: tesing api
+        content: testing api with volcapi is simple
+    response:
+      body:
+        status: 200
+        json:
+          data:
+            value: '{"content":"testing api with volcapi is simple","title":"tesing api"}'              # title: 
+    
 paths:
   /get:
     get:
@@ -65,3 +121,30 @@ paths:
           description: OK
       v-functional-test:
         scenarios: ["simple_get", "simple_get_query"]
+
+  /basic-auth/{user}/{passwd}:
+    get:
+      summary: Prompts the user for authorization using HTTP Basic Auth.
+      responses:
+        '200':
+          description: OK
+      v-functional-test:
+        scenarios: ["invalid_user", "valid_user"]
+
+  /bearer:
+    get:
+      summary: Prompts the user for authorization using bearer authentication.
+      responses:
+        '200':
+          description: OK
+
+      v-functional-test:
+        scenarios: ["invalid_token", "valid_token"]
+  /post:
+    post:
+      summary: The request's POST parametersx.
+      responses:
+        '200':
+          description: OK
+      v-functional-test:
+        scenarios: ["create_post"]

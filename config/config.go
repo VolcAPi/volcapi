@@ -31,7 +31,7 @@ type Scenario struct {
 	Params   map[string]string `yaml:"params"`
 	Query    map[string]string `yaml:"query"`
 	Headers  map[string]string `yaml:"headers"`
-	Request  map[string]any    `yaml:"request"`
+	Request  BodyRequest       `yaml:"request"`
 	Response Response          `yaml:"response"`
 }
 
@@ -40,10 +40,15 @@ type Response struct {
 	Body   Body `yaml:"body,omitempty"`
 }
 
+type BodyRequest struct {
+	Json *map[string]any `yaml:"json,omitempty"`
+	Text *string         `yaml:"text,omitempty"`
+}
+
 type Body struct {
-	Contains []string           `yaml:"contains,omitempty"`
-	Json     *map[string]JNode  `yaml:"json,omitempty"`
-	Text     *string `yaml:"text,omitempty"`
+	Contains []string          `yaml:"contains,omitempty"`
+	Json     *map[string]JNode `yaml:"json,omitempty"`
+	Text     *string           `yaml:"text,omitempty"`
 }
 
 type JNode struct {
@@ -109,21 +114,56 @@ func Parse(configPath, openApiPath string) (*Config, error) {
 		}
 	}
 
-	for _, s := range config.Scenarios {
+	for name, s := range config.Scenarios {
+		s.addRequiredFields("", s.Response.Body.Json)
 		s.resolveScenarios(mc.Env)
+    config.Scenarios[name] = s
 	}
 	return &config, nil
+}
+
+func (s *Scenario) addRequiredFields(prefix string, body *map[string]JNode) {
+	if body == nil {
+		return
+	}
+	for key, value := range *body {
+		path := key
+		if prefix != "" {
+			path = fmt.Sprintf("%s.%s", prefix, key)
+		}
+		if len(value.Object) > 0 {
+			s.addRequiredFields(path, &value.Object)
+		}
+
+		for i, item := range value.List {
+			indexPath := fmt.Sprintf("%s[%d]", path, i)
+			s.addRequiredFields(indexPath, &item)
+		}
+		isUnique := true
+		for _, value := range s.Response.Body.Contains {
+			if value == path {
+				isUnique = false
+			}
+		}
+		if len(value.Object) == 0 && len(value.List) == 0 && isUnique {
+			s.Response.Body.Contains = append(s.Response.Body.Contains, path)
+		}
+	}
 }
 
 func (s *Scenario) resolveScenarios(envMap map[string]string) {
 	for k, v := range s.Headers {
 		s.Headers[k] = resolveString(v, envMap)
 	}
-	for k, v := range s.Request {
-		if str, ok := v.(string); ok {
-			s.Request[k] = resolveString(str, envMap)
+	if s.Request.Json != nil {
+		json := *s.Request.Json
+		for k, v := range json {
+			if str, ok := v.(string); ok {
+				json[k] = resolveString(str, envMap)
+				s.Request.Json = &json
+			}
+			// todo: if value is map[string]any tell user to use json not value
 		}
-		// todo: if value is map[string]any tell user to use json not value
 	}
 
 	if s.Response.Body.Json != nil {
