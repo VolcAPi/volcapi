@@ -1,6 +1,5 @@
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/995be885-ec69-4d17-b177-8105eb7c09da" hight={40}  alt="VolcAPI">
-    <h1>🌋 VolcAPI</h1>
+  <img src="https://github.com/user-attachments/assets/995be885-ec69-4d17-b177-8105eb7c09da" height="350" alt="VolcAPI" />
   <p><strong>OpenAPI-Native API Testing Tool Built in Go</strong></p>
 </div>
 
