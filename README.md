@@ -55,7 +55,30 @@ Development teams currently struggle with:
 - **Multiple Output Formats**: JSON, JUnit XML for CI/CD integration
 - **Web Dashboard**: Historical results and team collaboration
 - **Integrations**: Grafana, Slack, GitHub Actions
-
+### Technical Architecture: my vision
+```
+┌─────────────────────────────────────────────────────────┐
+│                    OpenAPI Spec                         │
+│  (Single Source of Truth: API Definition + Tests)       │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│               APIFlow CLI (Go)                          │
+│  • Parse OpenAPI + test scenarios                       │
+│  • Load environment config (local/staging/prod)         │
+│  • Execute API requests                                 │
+│  • Validate responses                                   │
+│  • Generate reports                                     │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+      ┌───────────┼───────────┬──────────────┐
+      ▼           ▼           ▼              ▼
+  ┌───────┐  ┌─────────┐  ┌─────────┐   ┌──────────┐
+  │  CLI  │  │  Web    │  │ Grafana │   │  Slack   │
+  │Output │  │Dashboard│  │ Metrics │   │  Alerts  │
+  └───────┘  └─────────┘  └─────────┘   └──────────┘
+```
 ---
 
 ## 📖 Getting Started
@@ -376,9 +399,8 @@ jobs:
 - [x] Environment configuration system
 - [x] Response validation (status, JSON matching)
 - [x] CLI tool with basic commands
-- [ ] POST/PUT/DELETE request support
-- [ ] Advanced response validation (regex, types)
-- [ ] Better error reporting
+- [x] POST/PUT/DELETE request support
+- [ ] Better error reporting with cli or json 
 
 ### 🚧 Phase 2 (Next 2-3 months)
 - [ ] Performance/load testing
