@@ -110,8 +110,33 @@ scenarios:
         status: 200
         json:
           data:
-            value: '{"content":"testing api with volcapi is simple","title":"tesing api"}'              # title: 
-    
+            value: '{"content":"testing api with volcapi is simple","title":"tesing api"}' 
+  put_post:
+    headers:
+      Accept: application/json
+    request:
+      json:
+        title: tesing api with VolcAPI
+    response:
+      body:
+        status: 200
+        json:
+          data:
+            value: '{"title":"tesing api with VolcAPI"}'
+  delete_post:
+    query:
+      postId: 150
+    headers:
+      Accept: application/json
+    response:
+      body:
+        status: 200
+        json:
+          args:
+            object:
+              postId: 
+                value: "150"
+
 paths:
   /get:
     get:
@@ -148,3 +173,27 @@ paths:
           description: OK
       v-functional-test:
         scenarios: ["create_post"]
+  /put:
+    put:
+      summary: The request's PUT parameters.
+      responses:
+        '200':
+          description: OK
+      v-functional-test:
+        scenarios: ["put_post"]
+  /delete:
+    delete:
+      summary: The request's DELETE parameters.
+      responses:
+        '200':
+          description: OK
+      v-functional-test:
+        scenarios: ["delete_post"]
+  /patch:
+    patch:
+      summary: The request's PATCH parameters.
+      responses:
+        '200':
+          description: OK
+      v-functional-test:
+        scenarios: ["put_post"]

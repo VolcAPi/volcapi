@@ -117,7 +117,7 @@ func Parse(configPath, openApiPath string) (*Config, error) {
 	for name, s := range config.Scenarios {
 		s.addRequiredFields("", s.Response.Body.Json)
 		s.resolveScenarios(mc.Env)
-    config.Scenarios[name] = s
+		config.Scenarios[name] = s
 	}
 	return &config, nil
 }
@@ -186,9 +186,13 @@ func (s *Scenario) handleJson(json map[string]JNode, envMap map[string]string) {
 			fmt.Printf("⚠️  Warning: scenario %q: field %q has embedded object in 'value'. Use 'list' instead.\n", key, key)
 		}
 
-		s.Response.Body.Json = &map[string]JNode{
-			key: val,
+		if s.Response.Body.Json == nil {
+			s.Response.Body.Json = &map[string]JNode{}
 		}
+
+		jsonMap := *s.Response.Body.Json
+		jsonMap[key] = val
+		s.Response.Body.Json = &jsonMap
 
 		if len(val.Object) > 0 {
 			s.handleJson(val.Object, envMap)

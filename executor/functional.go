@@ -142,8 +142,11 @@ func validateJNode(actual any, key string, expected config.JNode) error {
 	switch realValue := actual.(type) {
 	case string:
 		expectedValue, match := expected.Value.(string)
+    	if !match {
+			return fmt.Errorf("invalid type: expected %s to be string, got %T", key, expected.Value)
+		}
 
-		if expected.Type != nil && *expected.Type != "string" || expectedValue != "" && !match {
+		if expected.Type != nil && *expected.Type != "string" {
 			return fmt.Errorf("invalid type expected %s to be string", key)
 		}
 		if expectedValue != "" && expectedValue != realValue {
@@ -156,6 +159,7 @@ func validateJNode(actual any, key string, expected config.JNode) error {
 			return fmt.Errorf("expected %s to have string bigger than %v", key, expected.Max)
 		}
 	case float64:
+    fmt.Println("key:", key) 
 		if exp, ok := expected.Value.(float64); ok && exp != realValue {
 			return fmt.Errorf("expected %s to be %v, got %v", key, exp, realValue)
 		}
