@@ -400,9 +400,11 @@ jobs:
 - [x] Response validation (status, JSON matching)
 - [x] CLI tool with basic commands
 - [x] POST/PUT/DELETE request support
-- [ ] Better error reporting with cli or json 
+- [ ] JUnit XML output (for CI/CD integration)
+- [ ] JSON output format (for parsing)
+- [ ] GitHub Actions example (copy-paste ready)
 
-### 🚧 Phase 2 (Next 2-3 months)
+### 🚧 Phase 2
 - [ ] Performance/load testing
 - [ ] Multiple output formats (JSON, JUnit)
 - [ ] Web dashboard for results
